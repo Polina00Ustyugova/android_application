@@ -47,7 +47,7 @@ public class FileUtil {
             fos.write(bytes);
         }
     }
-    
+
 
      //Сжимает изображение и конвертирует в Base64
 
@@ -90,7 +90,6 @@ public class FileUtil {
             return null;
         }
     }
-    
 
      //Получает длительность аудиофайла (в миллисекундах)
 
@@ -141,7 +140,6 @@ public class FileUtil {
         int lastSeparator = filePath.lastIndexOf(File.separator);
         return lastSeparator >= 0 ? filePath.substring(lastSeparator + 1) : filePath;
     }
-    
 
      //Получает размер файла в читаемом формате
 
@@ -153,4 +151,53 @@ public class FileUtil {
         
         return String.format("%.1f %s", size / Math.pow(1024, digitGroups), units[digitGroups]);
     }
+
+    public static boolean isFileSizeValid(String filePath, int maxSizeMB) {
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                return false;
+            }
+            
+            long fileSizeBytes = file.length();
+            long maxSizeBytes = maxSizeMB * 1024L * 1024L; // конвертируем МБ в байты
+            
+            return fileSizeBytes <= maxSizeBytes;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static String getReadableFileSize(String filePath) {
+        try {
+            File file = new File(filePath);
+            long size = file.length();
+            
+            if (size <= 0) return "0 B";
+            
+            final String[] units = {"B", "KB", "MB", "GB"};
+            int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+            
+            // Ограничиваем максимум MB
+            digitGroups = Math.min(digitGroups, 2);
+            
+            return String.format("%.1f %s", size / Math.pow(1024, digitGroups), units[digitGroups]);
+            
+        } catch (Exception e) {
+            return "неизвестно";
+        }
+    }
+
+    public static void showFileSizeError(Context context, String filePath, int maxSizeMB) {
+        String currentSize = getReadableFileSize(filePath);
+        String message = String.format(
+            "Файл слишком большой: %s\nМаксимальный размер: %d MB",
+            currentSize, maxSizeMB
+        );
+        
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+    }
+ 
 }
